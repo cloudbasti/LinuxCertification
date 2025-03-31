@@ -39,6 +39,8 @@ sudo find / -type f -perm -4000 -delete (delete all files found)
 find / -type f -size +1k -exec cp {} /opt/ \; (find all files with size)
 find / -type f -size +1M -size -5M (size ranges)
 find / -type f -size +1k -not -path "/proc/*" -not -path "/sys/*" (exclude directories from search)
+find / -type d -empty -delete (finds empty directories and deletes them)
+
 
 
 IMPORTANT COMMANDS: 
@@ -47,8 +49,26 @@ WRITE TO FILE WITH SUDO PERMISSIONS:
 sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'
 
 
-CHANGE TIMEZONES: 
+TIMEZONES:
 
-chrony or systemd-timesyncd  --- /etc/chrony.conf
+chrony or systemd-timesyncd   /etc/chrony.conf  /etc/systemd/timesyncd.conf systemctl status chronyd / systemd-timesyncd
+sudo timedatectl set-timezone Europe/Bucharest
+timedatectl list-timezones | grep Europe
+
+[Time]
+NTP=0.europe.pool.ntp.org 1.europe.pool.ntp.org  for /etc/systemd/timesyncd.conf
+sudo systemctl restart systemd-timesyncd !!!
+
+JOBS: 
+sudo -u john crontab -e --- 0 17 * * 3 john command --- User-specific cron jobs: 
+ 0 17 * * 3 john command System-wide cron jobs: /etc/crontab  /etc/cron.d/ 
+Predefined interval cron jobs: Files placed in /etc/cron.hourly/, /etc/cron.daily/, /etc/cron.weekly/, or /etc/cron.monthly/
+/etc/anacrontab 7 15 weekly-cleanup command     Anacron jobs: Similar to cron but runs missed jobs when the system comes back online
+at 5pm next wednesday --- At jobs: One-time scheduled jobs that run at a specific time
+crontab -e (open crontab)
+
+USERS: 
+sudo su - john (switch user)
+/etc/passwd 
 
 
