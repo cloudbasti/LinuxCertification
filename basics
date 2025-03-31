@@ -1,0 +1,54 @@
+hostnamectl -- display host information
+
+hostnamectl set-hostname <name>
+
+
+Basics: 
+ls -i  (shows inode information)
+
+ls --full-time 
+
+cp -R /tmp/Invoice/ /home/bob    (copy all contents)
+
+cp --preserve /home/bob/myfile.txt /home/bob/data (preserve attributes)
+
+mv /home/bob/lfcs/* /home/bob/new-data/ (move all contents from the directory, but not the directory itself)
+
+mv /home/bob/new_file /home/bob/old_file (rename a file)
+
+ln -s /tmp /home/bob/link_to_tmp (softlink to /tmp directory inside /home/bob with name link_to_tmp) SOFTLINK
+
+ln /path/to/original/file /path/to/link HARDLINK
+
+
+mkdir -p /tmp/1/2/3/4/5/6/7/8/9  (create with all non existing sub directories)
+
+FIND:
+
+find $HOME -mtime 0 (modified in last 24hours)
+find . -perm 664 (exactly these permissions)
+find -perm -664 (at least these permission, will also show higher ones)
+find -perm /664 (files / directories with any of these permissions)
+find -perm -u+r,g+r (at least owner AND group can read) 
+-perm /u+r,g+r (either owner OR group can read)
+find . -perm -444 -perm /222 ! -perm /111 (readable by everyone, writable by someone, not executable by anyone)
+find . -perm /u+w,g+w ! -perm /o+w (Files writable by either owner OR group, but not by others)
+sudo find / -type f ! -perm /4000 (find all files, which have SETUID deactivated)
+sudo find / -type f  -perm -4000 (find all files which have SETUID activated)
+sudo find / -type f -perm -4000 -delete (delete all files found)
+find / -type f -size +1k -exec cp {} /opt/ \; (find all files with size)
+find / -type f -size +1M -size -5M (size ranges)
+find / -type f -size +1k -not -path "/proc/*" -not -path "/sys/*" (exclude directories from search)
+
+
+IMPORTANT COMMANDS: 
+WRITE TO FILE WITH SUDO PERMISSIONS:
+
+sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'
+
+
+CHANGE TIMEZONES: 
+
+chrony or systemd-timesyncd  --- /etc/chrony.conf
+
+
