@@ -1,74 +1,66 @@
-hostnamectl -- display host information
+# Linux Command Reference
 
-hostnamectl set-hostname <name>
+## System Information
+- `hostnamectl` - display host information
+- `hostnamectl set-hostname <name>` - change hostname
 
+## File Operations
+- `ls -i` - shows inode information
+- `ls --full-time` - display timestamps in full format
+- `cp -R /tmp/Invoice/ /home/bob` - copy all contents recursively
+- `cp --preserve /home/bob/myfile.txt /home/bob/data` - preserve attributes
+- `mv /home/bob/lfcs/* /home/bob/new-data/` - move all contents, not directory itself
+- `mv /home/bob/new_file /home/bob/old_file` - rename a file
+- `ln -s /tmp /home/bob/link_to_tmp` - create symbolic link
+- `ln /path/to/original/file /path/to/link` - create hard link
+- `mkdir -p /tmp/1/2/3/4/5/6/7/8/9` - create with all non-existing subdirectories
 
-Basics: 
-ls -i  (shows inode information)
+## Find Command
+- `find $HOME -mtime 0` - modified in last 24 hours
+- `find . -perm 664` - exactly these permissions
+- `find -perm -664` - at least these permissions
+- `find -perm /664` - files/directories with any of these permissions
+- `find -perm -u+r,g+r` - at least owner AND group can read
+- `find -perm /u+r,g+r` - either owner OR group can read
+- `find . -perm -444 -perm /222 ! -perm /111` - readable by everyone, writable by someone, not executable by anyone
+- `find . -perm /u+w,g+w ! -perm /o+w` - files writable by owner OR group, but not by others
+- `sudo find / -type f ! -perm /4000` - find all files with SETUID deactivated
+- `sudo find / -type f -perm -4000` - find all files with SETUID activated
+- `sudo find / -type f -perm -4000 -delete` - delete all files found
+- `sudo find /opt/findme/ -type f -perm /u=s -exec rm {} \;` - find files with setuid and remove them
+- `find / -type f -size +1k -exec cp {} /opt/ \;` - find files by size and copy
+- `find / -type f -size +1M -size -5M` - find files in size range
+- `find / -type f -size +1k -not -path "/proc/*" -not -path "/sys/*"` - exclude directories
+- `find / -type d -empty -delete` - find and delete empty directories
 
-ls --full-time 
+## Important Commands
+- Write with sudo permissions:
+  - `sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'`
+  - `find /opt/findme/ -perm /u=x -type f | sudo tee /opt/foundthem.txt`
 
-cp -R /tmp/Invoice/ /home/bob    (copy all contents)
+## Time Management
+- Services: `chrony` or `systemd-timesyncd`
+- Config files: `/etc/chrony.conf` or `/etc/systemd/timesyncd.conf`
+- Check status: `systemctl status chronyd` or `systemctl status systemd-timesyncd`
+- `sudo timedatectl set-timezone Europe/Bucharest`
+- `timedatectl list-timezones | grep Europe`
+- NTP configuration: `/etc/systemd/timesyncd.conf`
+  ```
+  [Time]
+  NTP=0.europe.pool.ntp.org 1.europe.pool.ntp.org
+  ```
+- Restart time service: `sudo systemctl restart systemd-timesyncd`
 
-cp --preserve /home/bob/myfile.txt /home/bob/data (preserve attributes)
+## Job Scheduling
+- User cron: `sudo -u john crontab -e`
+- Cron syntax: `0 17 * * 3 john command`
+- System cron: `/etc/crontab` and `/etc/cron.d/`
+- Predefined intervals: `/etc/cron.hourly/`, `/etc/cron.daily/`, `/etc/cron.weekly/`, `/etc/cron.monthly/`
+- Anacron: `/etc/anacrontab` - `7 15 weekly-cleanup command`
+- At jobs: `at 5pm next wednesday`
+- Edit crontab: `crontab -e` (stored in `/var/spool/cron/crontabs/`)
 
-mv /home/bob/lfcs/* /home/bob/new-data/ (move all contents from the directory, but not the directory itself)
-
-mv /home/bob/new_file /home/bob/old_file (rename a file)
-
-ln -s /tmp /home/bob/link_to_tmp (softlink to /tmp directory inside /home/bob with name link_to_tmp) SOFTLINK
-
-ln /path/to/original/file /path/to/link HARDLINK
-
-
-mkdir -p /tmp/1/2/3/4/5/6/7/8/9  (create with all non existing sub directories)
-
-FIND:
-
-find $HOME -mtime 0 (modified in last 24hours)
-find . -perm 664 (exactly these permissions)
-find -perm -664 (at least these permission, will also show higher ones)
-find -perm /664 (files / directories with any of these permissions)
-find -perm -u+r,g+r (at least owner AND group can read) 
--perm /u+r,g+r (either owner OR group can read)
-find . -perm -444 -perm /222 ! -perm /111 (readable by everyone, writable by someone, not executable by anyone)
-find . -perm /u+w,g+w ! -perm /o+w (Files writable by either owner OR group, but not by others)
-sudo find / -type f ! -perm /4000 (find all files, which have SETUID deactivated)
-sudo find / -type f  -perm -4000 (find all files which have SETUID activated)
-sudo find / -type f -perm -4000 -delete (delete all files found)
-find / -type f -size +1k -exec cp {} /opt/ \; (find all files with size)
-find / -type f -size +1M -size -5M (size ranges)
-find / -type f -size +1k -not -path "/proc/*" -not -path "/sys/*" (exclude directories from search)
-find / -type d -empty -delete (finds empty directories and deletes them)
-
-
-
-IMPORTANT COMMANDS: 
-WRITE TO FILE WITH SUDO PERMISSIONS:
-
-sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'
-
-
-TIMEZONES:
-
-chrony or systemd-timesyncd   /etc/chrony.conf  /etc/systemd/timesyncd.conf systemctl status chronyd / systemd-timesyncd
-sudo timedatectl set-timezone Europe/Bucharest
-timedatectl list-timezones | grep Europe
-
-[Time]
-NTP=0.europe.pool.ntp.org 1.europe.pool.ntp.org  for /etc/systemd/timesyncd.conf
-sudo systemctl restart systemd-timesyncd !!!
-
-JOBS: 
-sudo -u john crontab -e --- 0 17 * * 3 john command --- User-specific cron jobs: 
- 0 17 * * 3 john command System-wide cron jobs: /etc/crontab  /etc/cron.d/ 
-Predefined interval cron jobs: Files placed in /etc/cron.hourly/, /etc/cron.daily/, /etc/cron.weekly/, or /etc/cron.monthly/
-/etc/anacrontab 7 15 weekly-cleanup command     Anacron jobs: Similar to cron but runs missed jobs when the system comes back online
-at 5pm next wednesday --- At jobs: One-time scheduled jobs that run at a specific time
-crontab -e (open crontab)
-
-USERS: 
-sudo su - john (switch user)
-/etc/passwd 
-
-
+## User Management
+- Switch user: `sudo su - john`
+- User information: `/etc/passwd`
+- User limits: `/etc/security/limits.conf` or `/etc/security/limits.d/`
