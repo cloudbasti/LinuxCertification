@@ -62,6 +62,36 @@
   - `sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'`
   - `find /opt/findme/ -perm /u=x -type f | sudo tee /opt/foundthem.txt`
 
+# Text Processing and Analysis
+
+## Text Manipulation
+- `cat file | grep pattern` - find lines with pattern
+- `grep -r "pattern" /path` - recursive search
+- `grep -v "pattern" file` - invert match (lines without pattern)
+- `grep -A 2 -B 2 "pattern" file` - show context (2 lines before, 2 after)
+- `sed 's/old/new/g' file` - replace all occurrences
+- `sed -i.bak 's/old/new/g' file` - replace and backup original
+- `awk '{print $1,$3}' file` - print fields 1 and 3
+- `awk -F: '{print $1}' /etc/passwd` - list usernames
+- `cut -d: -f1 /etc/passwd` - alternative to list usernames
+- `sort file` - sort lines alphabetically
+- `sort -n file` - sort numerically
+- `uniq` - remove adjacent duplicate lines
+- `sort file | uniq -c` - count occurrences of each line
+- `tr 'a-z' 'A-Z' < file` - convert to uppercase
+
+## Text Analysis 
+- `wc -l file` - count lines
+- `wc -w file` - count words
+- `wc -c file` - count bytes
+- `head -n 10 file` - show first 10 lines
+- `tail -n 10 file` - show last 10 lines
+- `tail -f logfile` - follow log file in real-time
+- `diff file1 file2` - show differences between files
+- `comm file1 file2` - compare sorted files
+- `hexdump -C file` - display file in hex and ASCII
+- `strings file` - extract text from binary file
+
 
 
 
