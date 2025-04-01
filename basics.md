@@ -1,19 +1,45 @@
-# Linux Command Reference
+# File Operations and Management
 
-
-
-## File Operations
-- `ls -i` - shows inode information
+## Basic File Operations
+- `ls -la` - list all files with details
+- `ls -i` - show inode information
 - `ls --full-time` - display timestamps in full format
-- `cp -R /tmp/Invoice/ /home/bob` - copy all contents recursively
-- `cp --preserve /home/bob/myfile.txt /home/bob/data` - preserve attributes
+- `cp -Rp source/ dest/` - recursive copy preserving attributes
+- `mv source target` - move or rename files
 - `mv /home/bob/lfcs/* /home/bob/new-data/` - move all contents, not directory itself
-- `mv /home/bob/new_file /home/bob/old_file` - rename a file
-- `ln -s /tmp /home/bob/link_to_tmp` - create symbolic link
-- `ln /path/to/original/file /path/to/link` - create hard link
-- `mkdir -p /tmp/1/2/3/4/5/6/7/8/9` - create with all non-existing subdirectories
+- `ln -s target linkname` - create symbolic link
+- `ln target linkname` - create hard link
+- `mkdir -p path/to/dir` - create with parent directories
+- `touch file` - create empty file or update timestamp
+- `stat file` - display detailed file information
+- `file myfile` - determine file type
 
-## Find Command
+## File Archiving and Compression
+- `tar -cf archive.tar files` - create uncompressed tar archive
+- `tar -czf archive.tar.gz files` - create gzip compressed archive
+- `tar -cjf archive.tar.bz2 files` - create bzip2 compressed archive
+- `tar -xf archive.tar -C /target` - extract to specific directory
+- `tar -tvf archive.tar` - list contents without extracting
+- `gzip file` - compress file (replaces original)
+- `gunzip file.gz` - decompress gzip file
+- `bzip2 file` - compress using bzip2 (better compression)
+- `bunzip2 file.bz2` - decompress bzip2 file
+- `xz file` - compress using xz (best compression)
+- `unxz file.xz` - decompress xz file
+- `zip archive.zip files` - create zip archive
+- `unzip archive.zip` - extract zip files
+
+## File Encryption
+- `gpg -c file` - encrypt file with password
+- `gpg file.gpg` - decrypt file
+- `openssl enc -aes-256-cbc -in file -out file.enc` - encrypt with OpenSSL
+- `openssl enc -d -aes-256-cbc -in file.enc -out file` - decrypt
+- `dd if=/dev/urandom of=key bs=32 count=1` - generate random key
+- `cryptsetup luksFormat /dev/sdX` - encrypt partition with LUKS
+- `cryptsetup luksOpen /dev/sdX secretdata` - open encrypted partition
+- `cryptsetup luksClose secretdata` - close encrypted partition
+
+## Find Command also to find directories
 - `find $HOME -mtime 0` - modified in last 24 hours
 - `find . -perm 664` - exactly these permissions
 - `find -perm -664` - at least these permissions
@@ -31,19 +57,12 @@
 - `find / -type f -size +1k -not -path "/proc/*" -not -path "/sys/*"` - exclude directories
 - `find / -type d -empty -delete` - find and delete empty directories
 
-## Important Commands
+## Important Commands to write to a file after using find
 - Write with sudo permissions:
   - `sudo sh -c 'find /opt/findme/ -perm -100 > /opt/foundthem.txt'`
   - `find /opt/findme/ -perm /u=x -type f | sudo tee /opt/foundthem.txt`
 
-## Job Scheduling
-- User cron: `sudo -u john crontab -e`
-- Cron syntax: `0 17 * * 3 john command`
-- System cron: `/etc/crontab` and `/etc/cron.d/`
-- Predefined intervals: `/etc/cron.hourly/`, `/etc/cron.daily/`, `/etc/cron.weekly/`, `/etc/cron.monthly/`
-- Anacron: `/etc/anacrontab` - `7 15 weekly-cleanup command`
-- At jobs: `at 5pm next wednesday`
-- Edit crontab: `crontab -e` (stored in `/var/spool/cron/crontabs/`)
+
 
 
 
