@@ -79,3 +79,12 @@
 - `newusers` - create multiple users from a file
 - `pwconv` / `pwunconv` - convert to/from shadow passwords
 - `grpconv` / `grpunconv` - convert to/from shadow groups
+
+- ## Environment Configuration
+- `source ~/.bashrc` / `source /etc/profile` - reload user/system bash configuration
+- `/etc/profile.d/` - directory containing system-wide shell scripts executed at login
+- `env` - display all environment variables
+- `/etc/environment` - system-wide environment variable file
+- `echo $PATH` - display the current executable search path
+- `export PATH=$PATH:/new/path` - add directory to PATH temporarily
+- `export VARIABLE=value` - set environment variable for current session
