@@ -324,3 +324,45 @@
 - `systemctl start/stop/restart squid` - control service
 - `squid -k parse` - check configuration syntax
 - `squid -k reconfigure` - reload configuration
+
+## Job Scheduling and Control
+
+### Cron Jobs
+- User crontabs: `crontab -e` - edit current user's crontab
+- System cron: `/etc/crontab` - system-wide cron configuration
+- Cron directories: `/etc/cron.d/`, `/etc/cron.daily/`, `/etc/cron.hourly/`, etc.
+- Cron syntax: `* * * * * command` (minute, hour, day, month, weekday)
+- List cron jobs: `crontab -l`
+- Remove all cron jobs: `crontab -r`
+- Example: `0 3 * * * /path/to/backup.sh` - run at 3 AM daily
+- View cron logs: `grep CRON /var/log/syslog`
+
+### Anacron
+- Configuration: `/etc/anacrontab`
+- Format: `period delay job-id command`
+- Example: `7 15 weekly-backup /path/to/backup.sh`
+- Manually run jobs: `anacron -n -f`
+- Periods: @daily, @weekly, @monthly
+
+### At Jobs
+- Schedule one-time job: `at 10:00 PM`
+- Schedule using different formats: `at now + 1 hour`, `at teatime tomorrow`
+- List pending jobs: `atq`
+- Remove job: `atrm job-number`
+- Check configuration: `/etc/at.allow` and `/etc/at.deny`
+
+### Shell Job Control
+- Run in background: `command &`
+- List jobs: `jobs`
+- Bring to foreground: `fg %1`
+- Send to background: `bg %1`
+- Suspend current job: `Ctrl+Z`
+- Kill job: `kill %1`
+- Detach from terminal: `disown %1`
+- Run immune to hangups: `nohup command &`
+- Execute with low priority: `nice -n 19 command`
+
+### Systemd Timers (Modern Alternative to Cron)
+- List timers: `systemctl list-timers`
+- Create timer: `/etc/systemd/system/backup.timer` and `/etc/systemd/system/backup.service`
+- Example timer:
