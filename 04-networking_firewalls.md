@@ -140,19 +140,6 @@
 - `ufw status numbered` - list rules with numbers
 - `ufw delete 2` - delete rule by number
 
-### firewalld (RHEL/CentOS/Fedora)
-- `firewall-cmd --state` - show firewall state
-- `firewall-cmd --get-default-zone` - show default zone
-- `firewall-cmd --get-active-zones` - show active zones
-- `firewall-cmd --list-all` - list all configurations
-- `firewall-cmd --list-all-zones` - list all zones configurations
-- `firewall-cmd --add-service=http` - allow HTTP temporarily
-- `firewall-cmd --add-service=http --permanent` - allow HTTP permanently
-- `firewall-cmd --add-port=8080/tcp --permanent` - allow custom port
-- `firewall-cmd --add-rich-rule='rule family="ipv4" source address="192.168.1.0/24" service name="ssh" accept' --permanent` - add rich rule
-- `firewall-cmd --remove-service=http --permanent` - remove service
-- `firewall-cmd --reload` - reload configuration
-
 ### iptables (Low-level)
 - `iptables -L` - list all rules
 - `iptables -L -v` - list all rules with details
@@ -233,19 +220,6 @@
 - `ip link set dev tun0 up` - bring tunnel up
 
 ## Network Services
-
-### SSH Server
-- `/etc/ssh/sshd_config` - SSH server configuration
-- Key settings:
-  ```
-  Port 22
-  PermitRootLogin no
-  PasswordAuthentication no
-  PubkeyAuthentication yes
-  ```
-- `systemctl restart sshd` - restart SSH server
-- `ssh-keygen -t rsa -b 4096` - generate SSH key
-- `ssh-copy-id user@host` - copy public key to server
 
 ### DHCP Server
 - `/etc/dhcp/dhcpd.conf` - DHCP server configuration
