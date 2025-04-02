@@ -1,13 +1,21 @@
 # Linux Filesystem Management Command Booklet
 
-## 1. Create Different Filesystems
+## 1. Filesystems
 
-### Important Files
-- `/etc/fstab` - Filesystem mount configuration
-- `/proc/filesystems` - Supported filesystems
-- `/proc/mounts` or `/etc/mtab` - Currently mounted filesystems
+### Overview and Verification
+```bash
+# View supported and mounted filesystems
+cat /proc/filesystems          # Supported filesystems
+cat /proc/mounts               # Currently mounted filesystems
+mount                          # Show all mounted filesystems
+findmnt                        # Show mounted filesystems in tree format
+lsblk -f                       # Show filesystems on all block devices
+df -h                          # Show disk space usage of mounted filesystems
+blkid                          # Show UUID and filesystem types of all block devices
+blkid /dev/sdXY                # Show UUID and filesystem type of specific device
+```
 
-### Create Filesystems
+### Create and Manage Filesystems
 ```bash
 # View block devices
 lsblk
@@ -18,129 +26,62 @@ mkfs.ext4 /dev/sdXY             # Create ext4 filesystem
 mkfs.xfs /dev/sdXY              # Create XFS filesystem
 mkfs.btrfs /dev/sdXY            # Create Btrfs filesystem
 mkfs.fat -F32 /dev/sdXY         # Create FAT32 filesystem
+
+# Mount/unmount filesystems
+mkdir -p /mnt/data1             # Create mount point
+mount /dev/sdXY /mnt/data1      # Mount specific device
+mount -o remount,rw /mnt/data1  # Remount with new options
+mount -a                        # Mount all in /etc/fstab
+umount /mnt/data1               # Unmount by mount point
+umount /dev/sdXY                # Unmount by device
+umount -l /mnt/data1            # Lazy unmount (when device is busy)
 ```
 
-### Verification Commands
+### Configuration Files
 ```bash
-lsblk -f                       # Show filesystems on all block devices
-blkid /dev/sdXY                # Show UUID and filesystem type
-dumpe2fs /dev/sdXY | grep -i "block size"    # ext filesystem details
-xfs_info /dev/sdXY             # XFS filesystem info
-tune2fs -l /dev/sdXY           # View ext filesystem parameters
-```
-
-## 2. Mount Filesystems at Boot
-
-### Important Files
-- `/etc/fstab` - Boot-time mount configuration
-
-### /etc/fstab Format
-```
+# /etc/fstab format
 <device> <mountpoint> <filesystem-type> <options> <dump> <fsck-order>
 
 # Examples:
 UUID=1234-5678-90ab-cdef /mnt/data1 ext4 defaults 0 2
 /dev/sdc1 /mnt/data2 xfs defaults 0 2
 /dev/sdd1 /mnt/data3 btrfs defaults,compress=zstd 0 2
+
+# Common mount options
+# defaults - Default options (rw,suid,dev,exec,auto,nouser,async)
+# noauto - Don't mount at boot
+# ro / rw - Read-only / Read-write
+# user / nouser - Allow / Disallow user mounts
+# exec / noexec - Allow / Prevent binary execution
+# sync / async - Synchronous / asynchronous I/O
+# nofail - Ignore device if not present
 ```
 
-### Common Mount Options
-- `defaults` - Default options (rw,suid,dev,exec,auto,nouser,async)
-- `noauto` - Don't mount at boot
-- `ro` / `rw` - Read-only / Read-write
-- `user` / `nouser` - Allow / Disallow user mounts
-- `exec` / `noexec` - Allow / Prevent binary execution
-- `sync` / `async` - Synchronous / asynchronous I/O
-- `nofail` - Ignore device if not present
-
-### Mount Commands
+### Advanced Verification
 ```bash
-mkdir -p /mnt/data1            # Create mount point
-mount -a                       # Mount all in /etc/fstab
-mount /dev/sdXY /mnt/data1     # Mount specific device
-mount -o remount,rw /mnt/data1 # Remount with new options
-umount /mnt/data1              # Unmount by mount point
-umount /dev/sdXY               # Unmount by device
-umount -l /mnt/data1           # Lazy unmount (when device is busy)
-```
-
-### Verification Commands
-```bash
-mount | grep "/mnt/data"       # Show mounted filesystems
-df -h                          # Show disk space usage
-findmnt                        # Show all mounted filesystems in tree
+dumpe2fs /dev/sdXY | grep -i "block size"  # ext filesystem details
+tune2fs -l /dev/sdXY           # View ext filesystem parameters
+xfs_info /dev/sdXY             # XFS filesystem info
 findmnt --verify --verbose     # Verify fstab syntax
 systemctl list-units --type=mount  # Show systemd mount units
 ```
 
-## 3. Remote Filesystems
+## 2. Partitions
 
-### NFS Server
-
-#### Important Files
-- `/etc/exports` - NFS export configuration
-
-#### Configuration and Commands
+### Overview and Verification
 ```bash
-# Install NFS server
-apt install nfs-kernel-server
-
-# /etc/exports syntax:
-/shared/dir 192.168.1.0/24(rw,sync,no_subtree_check)
-/backup    host.example.com(ro,sync,no_root_squash)
-
-# Apply configuration
-exportfs -ra                   # Refresh exports
-exportfs -v                    # View current exports
-
-# Start/manage service
-systemctl status nfs-kernel-server
-systemctl start nfs-kernel-server
-systemctl enable nfs-kernel-server
-```
-
-### NFS Client
-
-#### Important Files
-- `/etc/fstab` - For permanent mounts
-
-#### Commands
-```bash
-# Install NFS client
-apt install nfs-common
-
-# Mount NFS share
-mkdir -p /mnt/nfs
-mount -t nfs server:/shared/dir /mnt/nfs
-mount -t nfs -o ro,nosuid server:/shared/dir /mnt/nfs
-
-# Add to /etc/fstab
-server:/shared/dir /mnt/nfs nfs defaults,_netdev 0 0
-```
-
-### Verification Commands
-```bash
-showmount -e server            # List exports on server
-nfsstat                        # NFS statistics
-rpcinfo -p server              # RPC services
-mount | grep nfs               # Show mounted NFS filesystems
-df -h | grep nfs               # Show NFS filesystem usage
-```
-
-## 4. Partitions
-
-### Important Files
-- `/proc/partitions` - Current partition information
-- `/dev/sd*`, `/dev/nvme*` - Disk device files
-
-### Partition Commands
-```bash
-# View partitions
 fdisk -l                       # List all partitions
 parted -l                      # List all partitions (alternative)
 lsblk                          # List block devices in tree format
 cat /proc/partitions           # Show partition info from kernel
+sfdisk -l /dev/sdX             # List partitions
+sgdisk -p /dev/sdX             # List GPT partitions
+parted /dev/sdX print          # Show partition table
+parted /dev/sdX unit MiB print # Show sizes in MiB
+```
 
+### Create and Manage Partitions
+```bash
 # Create partitions with fdisk (interactive)
 fdisk /dev/sdX                 # Start fdisk (commands: n=new, d=delete, t=type, w=write)
 
@@ -156,44 +97,50 @@ echo ',,L,*' | sfdisk /dev/sdX # Create one Linux partition
 echo -e "label: gpt\n,512M,U,*\n,10G,L\n,5G,S\n," | sfdisk /dev/sdX # Multiple partitions
 ```
 
-### Verification Commands
+## 3. Remote Filesystems (NFS)
+
+### Overview and Verification
 ```bash
-sfdisk -l /dev/sdX             # List partitions
-sgdisk -p /dev/sdX             # List GPT partitions
-parted /dev/sdX print          # Show partition table
-parted /dev/sdX unit MiB print # Show sizes in MiB
+# Server-side
+exportfs -v                    # View current exports
+systemctl status nfs-kernel-server # Check NFS server status
+
+# Client-side
+showmount -e server            # List exports on server
+mount | grep nfs               # Show mounted NFS filesystems
+df -h | grep nfs               # Show NFS filesystem usage
+nfsstat                        # NFS statistics
+rpcinfo -p server              # RPC services
 ```
 
-## 5. Swap Space
-
-### Important Files
-- `/proc/swaps` - Current swap information
-- `/proc/sys/vm/swappiness` - Kernel swappiness parameter
-- `/etc/fstab` - For permanent swap configuration
-
-### Swap Commands
+### Setup and Management
 ```bash
-# Create swap partition
-mkswap /dev/sdXY               # Format as swap
-swapon /dev/sdXY               # Enable swap
-swapoff /dev/sdXY              # Disable swap
+# Server setup
+apt install nfs-kernel-server  # Install NFS server
+exportfs -ra                   # Refresh exports
+systemctl start nfs-kernel-server
+systemctl enable nfs-kernel-server
 
-# Create swap file
-dd if=/dev/zero of=/swapfile bs=1M count=1024    # Create 1GB file
-chmod 600 /swapfile            # Set permissions
-mkswap /swapfile               # Format as swap
-swapon /swapfile               # Enable swap
-
-# Add to /etc/fstab
-/dev/sdXY none swap sw 0 0     # Swap partition
-/swapfile none swap sw 0 0     # Swap file
-
-# Adjust swappiness (0-100, lower = less swapping)
-sysctl vm.swappiness=10        # Temporary
-echo "vm.swappiness=10" >> /etc/sysctl.conf  # Permanent
+# Client setup
+apt install nfs-common         # Install NFS client
+mkdir -p /mnt/nfs              # Create mount point
+mount -t nfs server:/shared/dir /mnt/nfs  # Mount NFS share
+mount -t nfs -o ro,nosuid server:/shared/dir /mnt/nfs  # Mount with options
 ```
 
-### Verification Commands
+### Configuration Files
+```bash
+# Server configuration: /etc/exports
+/shared/dir 192.168.1.0/24(rw,sync,no_subtree_check)
+/backup    host.example.com(ro,sync,no_root_squash)
+
+# Client configuration: /etc/fstab (for permanent mounts)
+server:/shared/dir /mnt/nfs nfs defaults,_netdev 0 0
+```
+
+## 4. Swap Space
+
+### Overview and Verification
 ```bash
 free -h                        # Show memory and swap usage
 swapon --show                  # Show swap devices
@@ -202,52 +149,79 @@ cat /proc/sys/vm/swappiness    # Current swappiness value
 vmstat 1                       # Virtual memory statistics
 ```
 
-## 6. Logical Volume Management (LVM)
-
-### Important Files
-- `/etc/lvm/lvm.conf` - LVM configuration
-- `/dev/mapper/` - Device mapper files
-
-### Physical Volumes (PV)
+### Create and Manage Swap
 ```bash
-pvcreate /dev/sdX1 /dev/sdX2   # Create PVs
-pvs                            # List PVs (brief)
-pvdisplay                      # List PVs (detailed)
-pvremove /dev/sdX1             # Remove PV
-pvscan                         # Scan for PVs
+# Create swap partition
+mkswap /dev/sdXY               # Format as swap
+swapon /dev/sdXY               # Enable swap
+swapoff /dev/sdXY              # Disable swap
+
+# Create swap file
+dd if=/dev/zero of=/swapfile bs=1M count=1024  # Create 1GB file
+chmod 600 /swapfile            # Set permissions
+mkswap /swapfile               # Format as swap
+swapon /swapfile               # Enable swap
+
+# Adjust swappiness (0-100, lower = less swapping)
+sysctl vm.swappiness=10        # Temporary
+echo "vm.swappiness=10" >> /etc/sysctl.conf  # Permanent
 ```
 
-### Volume Groups (VG)
+### Configuration Files
 ```bash
+# /etc/fstab entries for permanent swap
+/dev/sdXY none swap sw 0 0     # Swap partition
+/swapfile none swap sw 0 0     # Swap file
+```
+
+## 5. Logical Volume Management (LVM)
+
+### Overview and Verification
+```bash
+# Physical Volumes
+pvs                            # List PVs (brief)
+pvdisplay                      # List PVs (detailed)
+pvscan                         # Scan for PVs
+
+# Volume Groups
+vgs                            # List VGs (brief)
+vgdisplay                      # List VGs (detailed)
+vgscan                         # Scan for VGs
+vgdisplay vg_name -v | grep "Free PE"  # Show free space
+
+# Logical Volumes
+lvs                            # List LVs (brief)
+lvdisplay                      # List LVs (detailed)
+lvscan                         # Scan for LVs
+
+# Overall view
+lsblk | grep -E 'lvm|LVM'      # Show LVM in block devices
+dmsetup ls                     # List device mapper devices
+```
+
+### Create and Manage LVM
+```bash
+# Physical Volumes (PV)
+pvcreate /dev/sdX1 /dev/sdX2   # Create PVs
+pvremove /dev/sdX1             # Remove PV
+
+# Volume Groups (VG)
 vgcreate vg_name /dev/sdX1 /dev/sdX2  # Create VG
 vgextend vg_name /dev/sdX3     # Add PV to VG
 vgreduce vg_name /dev/sdX1     # Remove PV from VG
-vgs                            # List VGs (brief)
-vgdisplay                      # List VGs (detailed)
 vgremove vg_name               # Remove VG
-vgscan                         # Scan for VGs
-```
 
-### Logical Volumes (LV)
-```bash
+# Logical Volumes (LV)
 lvcreate -L 10G -n lv_name vg_name   # Create 10GB LV
 lvcreate -l 80%VG -n lv_name vg_name # Use 80% of VG
-lvs                            # List LVs (brief)
-lvdisplay                      # List LVs (detailed)
 lvextend -L +5G /dev/vg_name/lv_name  # Extend by 5GB
 lvextend -l +100%FREE /dev/vg_name/lv_name # Use all free space
 lvreduce -L -5G /dev/vg_name/lv_name  # Reduce by 5GB (unmount first!)
 lvremove /dev/vg_name/lv_name  # Delete LV
-lvscan                         # Scan for LVs
-```
 
-### Filesystem Operations with LVM
-```bash
-# Resize ext4 filesystem after extending LV (online)
-resize2fs /dev/vg_name/lv_name
-
-# Resize XFS filesystem (only grow, not shrink)
-xfs_growfs /mount/point
+# Filesystem Operations with LVM
+resize2fs /dev/vg_name/lv_name # Resize ext4 filesystem after extending LV
+xfs_growfs /mount/point        # Resize XFS filesystem (only grow, not shrink)
 
 # Create/manage snapshots
 lvcreate -L 1G -s -n snap_name /dev/vg_name/lv_name  # Create snapshot
@@ -255,13 +229,56 @@ mount -o ro /dev/vg_name/snap_name /mnt/snapshot     # Mount snapshot
 lvremove /dev/vg_name/snap_name                      # Remove snapshot
 ```
 
-### Verification Commands
+### Configuration Files
 ```bash
-dmsetup ls                     # List device mapper devices
-lsblk | grep -E 'lvm|LVM'      # Show LVM in block devices
-vgdisplay vg_name -v | grep "Free PE"  # Show free space
+# Main LVM configuration file
+/etc/lvm/lvm.conf
+
+# Device mapper files
+/dev/mapper/
 ```
 
+## 6. SELinux User Type Management
 
+### Overview and Verification
+```bash
+id -Z                          # Display current user's SELinux context
+ps -Z                          # Show SELinux contexts for running processes
+ls -Z                          # Show SELinux contexts for files and directories
+semanage login -l              # List all SELinux login mappings
+semanage user -l               # List all SELinux users and their MLS/MCS ranges
+sestatus                       # Show SELinux status and policy
+getsebool -a | grep user       # List SELinux booleans related to users
+ausearch -m avc --start recent # Search audit logs for recent SELinux denials
+aureport -a                    # Generate summary report of SELinux audit events
+```
 
+### Create and Manage SELinux Users
+```bash
+# Create and modify SELinux users
+semanage user -a -R "staff_r sysadm_r" -P user myseuser  # Create new SELinux user
+semanage user -m -R "staff_r sysadm_r system_r" myseuser # Modify roles for user
+semanage user -d myseuser      # Delete a SELinux user
+
+# Map Linux users to SELinux users
+semanage login -a -s user_u username                # Map Linux user to SELinux user
+semanage login -m -s staff_u username               # Change SELinux mapping 
+semanage login -d username                          # Remove SELinux mapping
+semanage login -a -s user_u -r s0:c100-c109 username # Map with specific MLS/MCS range
+
+# Managing SELinux defaults
+semanage login -a -s user_u %groupname              # Map Linux group to SELinux user
+semanage login -m -S targeted -s unconfined_u __default__ # Set default SELinux user
+
+# Change file contexts
+chcon -u system_u -r system_r -t etc_t /path/to/file # Change SELinux context
+restorecon -v /path/to/file                          # Restore default context
+setsebool -P allow_guest_exec_content on            # Set a SELinux boolean
+```
+
+### Configuration Files
+```bash
+/etc/selinux/targeted/seusers                      # Direct mapping file
+/etc/selinux/targeted/contexts/users/*             # SELinux user definition files
+```
 
