@@ -88,3 +88,46 @@
 - `echo $PATH` - display the current executable search path
 - `export PATH=$PATH:/new/path` - add directory to PATH temporarily
 - `export VARIABLE=value` - set environment variable for current session
+
+### For SELinux User Type Management
+
+- `semanage login -l` - List all SELinux login mappings (Linux user to SELinux user)
+- `semanage user -l` - List all SELinux users and their MLS/MCS ranges
+- `id -Z` - Display current user's SELinux context
+- `ps -Z` - Show SELinux contexts for running processes
+- `ls -Z` - Show SELinux contexts for files and directories
+
+### Creating and Modifying SELinux Users
+
+- `semanage user -a -R "staff_r sysadm_r" -P user myseuser` - Create new SELinux user with specified roles
+- `semanage user -m -R "staff_r sysadm_r system_r" myseuser` - Modify roles for existing SELinux user
+- `semanage user -d myseuser` - Delete a SELinux user
+
+### Mapping Linux Users to SELinux Users
+
+- `semanage login -a -s user_u username` - Map Linux user to SELinux user
+- `semanage login -m -s staff_u username` - Change SELinux user mapping for Linux user
+- `semanage login -d username` - Remove SELinux mapping for Linux user
+- `semanage login -a -s user_u -r s0:c100-c109 username` - Map Linux user with specific MLS/MCS range
+
+### Managing SELinux Defaults
+
+- `semanage login -a -s user_u %groupname` - Map all users in Linux group to SELinux user
+- `semanage login -m -S targeted -s unconfined_u __default__` - Set default SELinux user for new Linux users
+
+### System Configuration for SELinux Users
+
+- `/etc/selinux/targeted/seusers` - Direct mapping file (modified through semanage)
+- `/etc/selinux/targeted/contexts/users/*` - SELinux user definition files
+- `chcon -u system_u -r system_r -t etc_t /path/to/file` - Change SELinux context for a file
+- `restorecon -v /path/to/file` - Restore default SELinux context to file
+
+### For SELinux User Troubleshooting
+
+- `sestatus` - Show SELinux status and policy
+- `getsebool -a | grep user` - List SELinux booleans related to users
+- `setsebool -P allow_guest_exec_content on` - Permanently set a SELinux boolean
+- `ausearch -m avc --start recent` - Search audit logs for recent SELinux denials
+- `aureport -a` - Generate summary report of SELinux audit events
+
+These commands cover the essential SELinux user management operations that might appear in a Linux administration exam. Would you like me to explain any of these commands in more detail?
