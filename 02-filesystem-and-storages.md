@@ -218,6 +218,8 @@ lvextend -L +5G /dev/vg_name/lv_name  # Extend by 5GB
 lvextend -l +100%FREE /dev/vg_name/lv_name # Use all free space
 lvreduce -L -5G /dev/vg_name/lv_name  # Reduce by 5GB (unmount first!)
 lvremove /dev/vg_name/lv_name  # Delete LV
+lvresize 
+mkfs.ext4 /dev/vg_name/lv_name  #create a filesystem on the logical volume
 
 # Filesystem Operations with LVM
 resize2fs /dev/vg_name/lv_name # Resize ext4 filesystem after extending LV
