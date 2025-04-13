@@ -11,6 +11,7 @@
 - `ip link set dev eth0 down` - bring interface down
 - `ifconfig` - legacy command to show/manage network interfaces
 - `ethtool eth0` - show/change ethernet card settings
+- `ip route show` - show gateways
 
 ### IP Configuration
 - `ip addr add 192.168.1.10/24 dev eth0` - assign IP address
